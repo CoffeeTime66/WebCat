@@ -12,24 +12,22 @@ timeout = datetime.timedelta(minutes=5)
 
 def check_user(request):
     try:
-        if not Users.objects.filter(email=request.session['email'],
-                                    access_token=request.session['access_token']):
+        if not Users.objects.filter(email=request.session["email"], access_token=request.session["access_token"]):
             return False
-        update_last_seen(request.session['email'])
+        update_last_seen(request.session["email"])
         return True
     except KeyError:
         pass
     t = request.COOKIES
     try:
-        if Users.objects.filter(email=t['login'],
-                                access_token=t['access_token']):
-            request.session['login'] = t['login']
-            request.session['access_token'] = t['access_token']
-            update_last_seen(request.session['email'])
+        if Users.objects.filter(email=t["login"], access_token=t["access_token"]):
+            request.session["login"] = t["login"]
+            request.session["access_token"] = t["access_token"]
+            update_last_seen(request.session["email"])
             return True
     except KeyError:
         return False
-    update_last_seen(request.session['email'])
+    update_last_seen(request.session["email"])
     return True
 
 
@@ -38,14 +36,14 @@ def hash_pwd(email, password):
     salt = salt.salt
     password += salt
     encrypt_password = hashlib.sha256()
-    encrypt_password.update(password.encode('utf-8'))
+    encrypt_password.update(password.encode("utf-8"))
     encrypt_password = encrypt_password.digest()
     return encrypt_password
 
 
 def create_salt():
     salt = os.urandom(256)
-    salt = b64encode(salt).decode('utf-8')
+    salt = b64encode(salt).decode("utf-8")
     return salt
 
 
@@ -55,22 +53,20 @@ def create_user(email, login, password, name, surname, organization, about):
     if Users.objects.filter(login=login):
         return "False login"
     salt = create_salt()
-    user = Users(email=email,
-                 login=login,
-                 salt=salt,
-                 join_date=datetime.datetime.now(),
-                 last_seen=datetime.datetime.now(),
-                 user_status='user',
-                 access_level=0)
+    user = Users(
+        email=email,
+        login=login,
+        salt=salt,
+        join_date=datetime.datetime.now(),
+        last_seen=datetime.datetime.now(),
+        user_status="user",
+        access_level=0,
+    )
     user.save()
     password = hash_pwd(email, password)
     user.password = password
     user.save()
-    user_info = UserInfo(name=name,
-                         surname=surname,
-                         organization=organization,
-                         about=about,
-                         user=user)
+    user_info = UserInfo(name=name, surname=surname, organization=organization, about=about, user=user)
     user_info.save()
     return True
 
@@ -80,7 +76,7 @@ def check_authorize(email, password, access_token=None):
         if not Users.objects.filter(email=email, access_token=access_token):
             return False
         return True
-    if '@' not in email:
+    if "@" not in email:
         email = Users.objects.get(login=email).email
     if not Users.objects.filter(email=email):
         return False
@@ -88,7 +84,7 @@ def check_authorize(email, password, access_token=None):
     if not Users.objects.filter(email=email, password=encrypt_password):
         return False
     access_token = os.urandom(512)
-    access_token = b64encode(access_token).decode('utf-8')
+    access_token = b64encode(access_token).decode("utf-8")
     set_access_token(email, access_token)
     return access_token
 
@@ -110,7 +106,7 @@ def get_email(login, user_id=None):
 def get_user_info(email):
     model_user_info = UserInfo.objects.get(user=Users.objects.get(email=email).id)
     user = {
-        'name': model_user_info.name,
+        "name": model_user_info.name,
     }
     return user
 
@@ -119,14 +115,14 @@ def get_full_user_info(email):
     model_user_info = UserInfo.objects.get(user=Users.objects.get(email=email).id)
     model_user = Users.objects.get(email=email)
     user = {
-        'name': model_user_info.name,
-        'surname': model_user_info.surname,
-        'id': model_user.id,
-        'email': email,
-        'about': model_user_info.about,
-        'join_date': model_user.join_date.strftime("%b %d, %Y"),
-        'last_seen': is_online(model_user.last_seen),
-        'user_status': model_user.user_status,
+        "name": model_user_info.name,
+        "surname": model_user_info.surname,
+        "id": model_user.id,
+        "email": email,
+        "about": model_user_info.about,
+        "join_date": model_user.join_date.strftime("%b %d, %Y"),
+        "last_seen": is_online(model_user.last_seen),
+        "user_status": model_user.user_status,
     }
     return user
 
@@ -144,27 +140,27 @@ def is_online(time):
         time = timezone.now() - time
         if time < datetime.timedelta(minutes=1):
             time = str(time.seconds)
-            if time == '1':
-                time += ' second'
+            if time == "1":
+                time += " second"
             else:
-                time += ' seconds'
+                time += " seconds"
         elif time < datetime.timedelta(hours=1):
             time = str((time.seconds // 60) % 60)
-            if time == '1':
-                time += ' minute'
+            if time == "1":
+                time += " minute"
             else:
-                time += ' minutes'
+                time += " minutes"
         elif time < datetime.timedelta(days=1):
             time = str(time.seconds // 3600)
-            if time == '1':
-                time += ' hour'
+            if time == "1":
+                time += " hour"
             else:
-                time += ' hours'
+                time += " hours"
         else:
             time = str(time.days)
-            if time == '1':
-                time += ' day'
+            if time == "1":
+                time += " day"
             else:
-                time += ' day'
+                time += " day"
         return time
     return "Online"
