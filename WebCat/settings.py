@@ -25,7 +25,7 @@ SECRET_KEY = "46r6m#z&9t$)3#kpz(@)nxxk9(c&wioniddriu*2199#@p7476"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["lalafo.onrender.com", "lalafo.netlify.app", "webcatifmo.herokuapp.com", "127.0.0.1"]
+ALLOWED_HOSTS = ["edcontrol.onrender.com", "127.0.0.1"]
 
 
 # Application definition
